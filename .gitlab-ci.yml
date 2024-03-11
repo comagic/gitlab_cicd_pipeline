@@ -111,6 +111,7 @@ set-tag:
 
 # -----------------------------------
 
+# pre-production
 deploy1-to-pp:
   stage: deploy
   environment: pp
@@ -120,38 +121,15 @@ deploy1-to-pp:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_REF_NAME == "master"'
 
-deploy2-to-rolands:
+# production
+deploy2-to-cg:
   stage: deploy
-  environment: rolands
+  environment: cg
   script:
     - echo "pg_migration upgrade -h top"
   when: manual
   rules:
     - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_REF_NAME == "master"'
-
-deploy3-to-cg:
-  stage: deploy
-  environment: usa
-  script:
-    - echo "pg_migration upgrade -h top"
-  when: manual
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_REF_NAME == "master"'
-
-deploy4-to-nf:
-  stage: deploy
-  environment: nf
-  script:
-    - echo "pg_migration upgrade -h top"
-  when: manual
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_REF_NAME == "master"'
-
-deploy5-to-cm:
-  stage: deploy
-  environment: prod
-  script:
-    - echo "pg_migration upgrade -h top"
   when: manual
   rules:
     - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_REF_NAME == "master"'
