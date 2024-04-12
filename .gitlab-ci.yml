@@ -2,6 +2,7 @@ stages:
   - build-preveous
   - test-release
   - check
+  - auto-merge
   - clean
   - set-tag
   - deploy
@@ -95,6 +96,20 @@ clean:
   script:
     - dropdb ci_cd_tmp
 
+auto-merge:
+  stage: auto-merge
+  allow_failure: false
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "push" &&
+           $CI_COMMIT_REF_NAME != "master" &&
+           $CI_COMMIT_REF_NAME != "cg" &&
+           $CI_COMMIT_REF_NAME != "pp" &&
+           $CI_COMMIT_MESSAGE =~ /auto-merge|auto-deploy/'
+  script:
+    - pg_migration auto_merge
+
 set-tag:
   stage: set-tag
   allow_failure: false
@@ -120,9 +135,10 @@ deploy1-to-pp:
     - git push https://root:$ACCESS_TOKEN@$CI_SERVER_HOST/$CI_PROJECT_PATH.git/ :refs/tags/pp
     - git tag -fa pp -m ""
     - git push https://root:$ACCESS_TOKEN@$CI_SERVER_HOST/$CI_PROJECT_PATH.git/ pp
-  when: manual
   rules:
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_REF_NAME == "master" && $CI_COMMIT_MESSAGE =~ /auto-deploy/'
     - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_REF_NAME == "master"'
+      when: manual
 
 # production
 deploy2-to-cg:
@@ -133,6 +149,7 @@ deploy2-to-cg:
     - git push https://root:$ACCESS_TOKEN@$CI_SERVER_HOST/$CI_PROJECT_PATH.git/ :refs/tags/cg
     - git tag -fa cg -m ""
     - git push https://root:$ACCESS_TOKEN@$CI_SERVER_HOST/$CI_PROJECT_PATH.git/ cg
-  when: manual
   rules:
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_REF_NAME == "master" && $CI_COMMIT_MESSAGE =~ /auto-deploy/'
     - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_REF_NAME == "master"'
+      when: manual
