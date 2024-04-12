@@ -13,7 +13,10 @@ build-preveous:
   rules:
     - if: $CI_COMMIT_TAG
       when: never
-    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_REF_NAME != "master"'
+    - if: '$CI_PIPELINE_SOURCE == "push" &&
+           $CI_COMMIT_REF_NAME != "master" &&
+           $CI_COMMIT_REF_NAME != "cg" &&
+           $CI_COMMIT_REF_NAME != "pp"'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   script:
     - previous_version=`pg_migration log | tail -n 2 | head -n 1`
@@ -30,7 +33,10 @@ release:
   rules:
     - if: $CI_COMMIT_TAG
       when: never
-    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_REF_NAME != "master"'
+    - if: '$CI_PIPELINE_SOURCE == "push" &&
+           $CI_COMMIT_REF_NAME != "master" &&
+           $CI_COMMIT_REF_NAME != "cg" &&
+           $CI_COMMIT_REF_NAME != "pp"'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   script:
     - pg_migration -d ci_cd_tmp upgrade
@@ -43,7 +49,10 @@ pg-export:
   rules:
     - if: $CI_COMMIT_TAG
       when: never
-    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_REF_NAME != "master"'
+    - if: '$CI_PIPELINE_SOURCE == "push" &&
+           $CI_COMMIT_REF_NAME != "master" &&
+           $CI_COMMIT_REF_NAME != "cg" &&
+           $CI_COMMIT_REF_NAME != "pp"'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   script:
     - pg_export --clean ci_cd_tmp /tmp/exp
@@ -56,7 +65,10 @@ plpgsql-check:
   rules:
     - if: $CI_COMMIT_TAG
       when: never
-    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_REF_NAME != "master"'
+    - if: '$CI_PIPELINE_SOURCE == "push" &&
+           $CI_COMMIT_REF_NAME != "master" &&
+           $CI_COMMIT_REF_NAME != "cg" &&
+           $CI_COMMIT_REF_NAME != "pp"'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   script:
     - pg_migration -d ci_cd_tmp plpgsql_check
@@ -67,7 +79,10 @@ code-style:
   rules:
     - if: $CI_COMMIT_TAG
       when: never
-    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_REF_NAME != "master"'
+    - if: '$CI_PIPELINE_SOURCE == "push" &&
+           $CI_COMMIT_REF_NAME != "master" &&
+           $CI_COMMIT_REF_NAME != "cg" &&
+           $CI_COMMIT_REF_NAME != "pp"'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   script:
     - comagic_code_style .
@@ -78,7 +93,10 @@ auto-tests:
   rules:
     - if: $CI_COMMIT_TAG
       when: never
-    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_REF_NAME != "master"'
+    - if: '$CI_PIPELINE_SOURCE == "push" &&
+           $CI_COMMIT_REF_NAME != "master" &&
+           $CI_COMMIT_REF_NAME != "cg" &&
+           $CI_COMMIT_REF_NAME != "pp"'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   script:
     - db_test -d tmp:. -t tests/regress/ -v
@@ -91,7 +109,10 @@ clean:
   rules:
     - if: $CI_COMMIT_TAG
       when: never
-    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_REF_NAME != "master"'
+    - if: '$CI_PIPELINE_SOURCE == "push" &&
+           $CI_COMMIT_REF_NAME != "master" &&
+           $CI_COMMIT_REF_NAME != "cg" &&
+           $CI_COMMIT_REF_NAME != "pp"'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   script:
     - dropdb ci_cd_tmp
