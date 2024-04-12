@@ -151,26 +151,40 @@ set-tag:
 deploy1-to-pp:
   stage: deploy
   environment: pp
-  script:
-    - pg_migration -d cicd_pp upgrade
-    - git push https://root:$ACCESS_TOKEN@$CI_SERVER_HOST/$CI_PROJECT_PATH.git/ :refs/tags/pp
-    - git tag -fa pp -m ""
-    - git push https://root:$ACCESS_TOKEN@$CI_SERVER_HOST/$CI_PROJECT_PATH.git/ pp
   rules:
     - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_REF_NAME == "master" && $CI_COMMIT_MESSAGE =~ /auto-deploy/'
     - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_REF_NAME == "master"'
       when: manual
+  script:
+    - git config --global user.name "${GITLAB_USER_NAME}"
+    - git config --global user.email "${GITLAB_USER_EMAIL}"
+    - current_version=`pg_migration log | tail -n 1`
+    - echo $current_version
+    - git fetch origin pp
+    - git checkout -q -B pp origin/pp
+    - git merge -m "Merge tag '$current_version' into pp" $current_version
+    - pg_migration -d $DEPLOY_DATABASE upgrade
+    - git push https://root:$ACCESS_TOKEN@$CI_SERVER_HOST/$CI_PROJECT_PATH.git/ pp:pp
+    - pg_export $DEPLOY_DATABASE /tmp/exp
+    - diff -x "public.sql" -r /tmp/exp/schemas/ schemas/
 
 # production
 deploy2-to-cg:
   stage: deploy
   environment: cg
-  script:
-    - pg_migration -d cicd_cg upgrade
-    - git push https://root:$ACCESS_TOKEN@$CI_SERVER_HOST/$CI_PROJECT_PATH.git/ :refs/tags/cg
-    - git tag -fa cg -m ""
-    - git push https://root:$ACCESS_TOKEN@$CI_SERVER_HOST/$CI_PROJECT_PATH.git/ cg
   rules:
     - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_REF_NAME == "master" && $CI_COMMIT_MESSAGE =~ /auto-deploy/'
     - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_REF_NAME == "master"'
       when: manual
+  script:
+    - git config --global user.name "${GITLAB_USER_NAME}"
+    - git config --global user.email "${GITLAB_USER_EMAIL}"
+    - current_version=`pg_migration log | tail -n 1`
+    - echo $current_version
+    - git fetch origin cg
+    - git checkout -q -B cg origin/cg
+    - git merge -m "Merge tag '$current_version' into cg" $current_version
+    - pg_migration -d $DEPLOY_DATABASE upgrade
+    - git push https://root:$ACCESS_TOKEN@$CI_SERVER_HOST/$CI_PROJECT_PATH.git/ cg:cg
+    - pg_export $DEPLOY_DATABASE /tmp/exp
+    - diff -x "public.sql" -r /tmp/exp/schemas/ schemas/
